@@ -1,4 +1,4 @@
-name: Android Secure Sandbox CI
+name: Android Secure Sandbox Build
 
 on:
   push:
@@ -11,45 +11,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Kodlarni eng yangi v5 versiya bilan yuklab olish (Node 24 mosligi uchun)
+    # 1. Siz yuklagan java fayllarni va readme'ni yuklab olish
     - name: Checkout Repository
       uses: actions/checkout@v5
 
-    # 2. Java muhitini sozlash
+    # 2. Java va Android SDK muhitini sozlash
     - name: Set up JDK 17
       uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    # 3. Gradle fayllarini qidirish va unga ruxsat berish
-    - name: Grant execute permission for gradlew
+    # 3. Yo'q bo'lgan Gradle muhitini va Android strukturani avtomat yaratish
+    - name: Auto Create Android Project Structure
       run: |
-        if [ -f "./gradlew" ]; then
-          chmod +x ./gradlew
-        else
-          find . -name "gradlew" -exec chmod +x {} \;
-        fi
+        echo "Android loyiha muhiti avtomatik tiklanmoqda..."
+        
+        # Kerakli papkalarni ochish
+        mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
+        mkdir -p app/src/main/java/com/daxilsiz/suhbat/sandbox
+        mkdir -p app/src/main/java/com/daxilsiz/suhbat/core
+        
+        # Siz yuklagan fayllarni tegishli paket joylariga ko'chirish
+        [ -f "ui/SecurityLockActivity.java" ] && cp ui/SecurityLockActivity.java app/src/main/java/com/daxilsiz/suhbat/ui/
+        [ -f "sandbox/SecureContainer.java" ] && cp sandbox/SecureContainer.java app/src/main/java/com/daxilsiz/suhbat/sandbox/
+        [ -f "core/OfflineCryptoEngine.java" ] && cp core/OfflineCryptoEngine.java app/src/main/java/com/daxilsiz/suhbat/core/
+        
+        # Asosiy sozlama fayllarini avtomat hosil qilish
+        echo "pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }; dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }; rootProject.name = 'Daxilsiz'" > settings.gradle
+        
+        echo "plugins { id 'com.android.application' version '8.1.1' } inline; android { compileSdk 34; defaultConfig { applicationId 'com.daxilsiz.suhbat'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0' }; buildTypes { release { minifyEnabled false } } }" > app/build.gradle
+        
+        # Loyiha tuzilishini tayyorlash va gradlew yuklash
+        gradle wrapper --gradle-version 8.0
 
-    # 4. APK ilovani avtomat yig'ish (Xato aniq ko'rinishi uchun find qo'shildi)
-    - name: Build with Gradle
+    # 4. Skriptga ruxsat berish va APKni muvaffaqiyatli yig'ish
+    - name: Build Android Secure APK
       run: |
-        if [ -f "./gradlew" ]; then
-          ./gradlew assembleDebug
-        else
-          GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
-          if [ -z "$GRADLE_PATH" ]; then
-            echo "XATO: gradlew fayli topilmadi! Loyihangizni to'g'ri push qilganingizni tekshiring."
-            exit 1
-          fi
-          DIR_PATH=$(dirname "$GRADLE_PATH")
-          cd "$DIR_PATH" && ./gradlew assembleDebug
-        fi
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
-    # 5. TAYYOR APK FAYLNI YUKLAB OLISH UCHUN CHIQARISH (Siz so'ragan qism)
-    - name: Upload APK Artifact
+    # 5. Tayyor bo'lgan APKni yuklab olish havolasini chiqarish
+    - name: Upload Secure App APK
       uses: actions/upload-artifact@v4
       with:
-        name: Daxilsiz-Suhbat-Sandbox-APK
-        path: "**/build/outputs/apk/debug/*.apk"
+        name: Daxilsiz-Suhbat-Secure-App
+        path: "app/build/outputs/apk/debug/*.apk"
         if-no-files-found: error
