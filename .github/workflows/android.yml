@@ -28,15 +28,16 @@ jobs:
       with:
         gradle-version: '8.0'
 
-    # 4. Android loyiha strukturasini mukammal sxema bilan yaratish
+    # 4. Android loyiha strukturasini xavfsiz va aniq usulda yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti eng aniq sxema bilan tiklanmoqda..."
+        echo "Android loyiha muhiti buzilmas shaklda tiklanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/sandbox
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/core
+        mkdir -p app/src/main
         
         # Java fayllarini ko'chirish va paket nomlarini to'g'rilash
         if [ -f "ui/SecurityLockActivity.java" ]; then
@@ -100,24 +101,8 @@ jobs:
         }
         EOF
 
-        # TIZIMNING STANDART VA TO'G'RI SCHEMASI BILAN TIKLANGAN AndroidManifest.xml
-        mkdir -p app/src/main
-        echo '<?xml version="1.0" encoding="utf-8"?>' > app/src/main/AndroidManifest.xml
-        echo '<manifest xmlns:android="http://android.com">' >> app/src/main/AndroidManifest.xml
-        echo '    <application' >> app/src/main/AndroidManifest.xml
-        echo '        android:allowBackup="true"' >> app/src/main/AndroidManifest.xml
-        echo '        android:label="Daxilsiz"' >> app/src/main/AndroidManifest.xml
-        echo '        android:supportsRtl="true">' >> app/src/main/AndroidManifest.xml
-        echo '        <activity' >> app/src/main/AndroidManifest.xml
-        echo '            android:name="com.daxilsiz.suhbat.ui.SecurityLockActivity"' >> app/src/main/AndroidManifest.xml
-        echo '            android:exported="true">' >> app/src/main/AndroidManifest.xml
-        echo '            <intent-filter>' >> app/src/main/AndroidManifest.xml
-        echo '                <action android:name="android.intent.action.MAIN" />' >> app/src/main/AndroidManifest.xml
-        echo '                <category android:name="android.intent.category.LAUNCHER" />' >> app/src/main/AndroidManifest.xml
-        echo '            </intent-filter>' >> app/src/main/AndroidManifest.xml
-        echo '        </activity>' >> app/src/main/AndroidManifest.xml
-        echo '    </application>' >> app/src/main/AndroidManifest.xml
-        echo '</manifest>' >> app/src/main/AndroidManifest.xml
+        # MANIFEST FAYLINI BUZILMAS BASE64 USULIDA TIKLASH (Xatoni butunlay yo'q qiladi)
+        echo "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCI+CiAgICA8YXBwbGljYXRpb24KICAgICAgICBhbmRyb2lkOmFsbG93QmFja3VwPSJ0cnVlIgogICAgICAgIGFuZHJvaWQ6bGFiZWw9IkRheGlsc2l6IgogICAgICAgIGFuZHJvaWQ6c3VwcG9ydHNSdGw9InRydWUiPgogICAgICAgIDxhY3Rpdml0eQogICAgICAgICAgICBhbmRyb2lkOm5hbWU9ImNvbS5kYXhpbHNpei5zdWhiYXQudWkuU2VjdXJpdHlMb2NrQWN0aXZpdHkiCiAgICAgICAgICAgIGFuZHJvaWQ6ZXhwb3J0ZWQ9InRydWUiPgogICAgICAgICAgICA8aW50ZW50LWZpbHRlcj4KICAgICAgICAgICAgICAgIDxhY3Rpb24gYW5kcm9pZDpuYW1lPSJhbmRyb2lkLmludGVudC5hY3Rpb24uTUFJTiIgLz4KICAgICAgICAgICAgICAgIDxjYXRlZ29yeSBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LmNhdGVnb3J5LkxBVU5DSEVSIiAvPgogICAgICAgICAgICA8L2ludGVudC1maWx0ZXI+CiAgICAgICAgPC9hY3Rpdml0eT4KICAgIDwvYXBwbGljYXRpb24+CjwvbWFuaWZlc3Q+" | base64 -d > app/src/main/AndroidManifest.xml
         
         gradle wrapper --gradle-version 8.0
 
