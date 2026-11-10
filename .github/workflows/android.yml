@@ -11,50 +11,107 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Siz yuklagan java fayllarni va readme'ni yuklab olish
+    # 1. GitHub repozitoriyangizdagi fayllarni yuklab olish
     - name: Checkout Repository
       uses: actions/checkout@v5
 
-    # 2. Java va Android SDK muhitini sozlash
+    # 2. Java muhitini sozlash
     - name: Set up JDK 17
       uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    # 3. Yo'q bo'lgan Gradle muhitini va Android strukturani avtomat yaratish
+    # 3. Android loyiha strukturasini qatorma-qator to'g'ri yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti avtomatik tiklanmoqda..."
+        echo "Android loyiha muhiti qayta tiklanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/sandbox
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/core
         
-        # Siz yuklagan fayllarni tegishli paket joylariga ko'chirish
+        # Siz yuklagan fayllarni o'z joylariga nusxalash
         [ -f "ui/SecurityLockActivity.java" ] && cp ui/SecurityLockActivity.java app/src/main/java/com/daxilsiz/suhbat/ui/
         [ -f "sandbox/SecureContainer.java" ] && cp sandbox/SecureContainer.java app/src/main/java/com/daxilsiz/suhbat/sandbox/
         [ -f "core/OfflineCryptoEngine.java" ] && cp core/OfflineCryptoEngine.java app/src/main/java/com/daxilsiz/suhbat/core/
         
-        # Asosiy sozlama fayllarini avtomat hosil qilish
-        echo "pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }; dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }; rootProject.name = 'Daxilsiz'" > settings.gradle
+        # settings.gradle faylini to'g'ri yozish (app modulini qo'shish)
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "Daxilsiz"
+        include ':app'
+        EOF
         
-        echo "plugins { id 'com.android.application' version '8.1.1' } inline; android { compileSdk 34; defaultConfig { applicationId 'com.daxilsiz.suhbat'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0' }; buildTypes { release { minifyEnabled false } } }" > app/build.gradle
+        # app/build.gradle faylini qatorma-qator tuzish
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application' version '8.1.1'
+        }
         
-        # Loyiha tuzilishini tayyorlash va gradlew yuklash
+        android {
+            namespace 'com.daxilsiz.suhbat'
+            compileSdk 34
+            
+            defaultConfig {
+                applicationId "com.daxilsiz.suhbat"
+                minSdk 24
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+            
+            buildTypes {
+                release {
+                    minifyEnabled false
+                }
+            }
+        }
+        EOF
+
+        # Bo'sh AndroidManifest.xml faylini yaratish (baxshiy xavfsizlik uchun majburiy)
+        mkdir -p app/src/main
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <manifest xmlns:android="http://android.com">
+            <application android:label="Daxilsiz Suhbat">
+                <activity android:name=".ui.SecurityLockActivity" android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+        
+        # Gradle dasturini yuklash
         gradle wrapper --gradle-version 8.0
 
-    # 4. Skriptga ruxsat berish va APKni muvaffaqiyatli yig'ish
+    # 4. APK ilovani yig'ish (Endi assembleDebug vazifasi ishlaydi)
     - name: Build Android Secure APK
       run: |
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew :app:assembleDebug
 
-    # 5. Tayyor bo'lgan APKni yuklab olish havolasini chiqarish
+    # 5. Tayyor APK faylni yuklab olish uchun chiqarish
     - name: Upload Secure App APK
       uses: actions/upload-artifact@v4
       with:
         name: Daxilsiz-Suhbat-Secure-App
         path: "app/build/outputs/apk/debug/*.apk"
         if-no-files-found: error
+
