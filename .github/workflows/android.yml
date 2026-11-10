@@ -28,10 +28,10 @@ jobs:
       with:
         gradle-version: '8.0'
 
-    # 4. Android loyiha strukturasini mukammal standartda yaratish
+    # 4. Android loyiha strukturasini to'liq standartda yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti va paket nomlari qayta tiklanmoqda..."
+        echo "Android loyiha muhiti va rasmiy manifest sxemasi tiklanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
@@ -100,7 +100,7 @@ jobs:
         }
         EOF
 
-        # TIZIM MANZILI TO'G'RILANGAN AndroidManifest.xml (Xatolikni yo'qotadi)
+        # NIKOHI TO'G'RILANGAN RASMIY AndroidManifest.xml (Xatolikni ildizi bilan yo'q qiladi)
         mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
@@ -108,7 +108,7 @@ jobs:
             package="com.daxilsiz.suhbat">
             <application
                 android:allowBackup="true"
-                android:label="Daxilsiz Suhbat"
+                android:label="Daxilsiz"
                 android:supportsRtl="true">
                 <activity 
                     android:name=".ui.SecurityLockActivity" 
@@ -124,7 +124,7 @@ jobs:
         
         gradle wrapper --gradle-version 8.0
 
-    # 5. APK ilovani yig'ish (Yashil bo'lib yakunlanadi)
+    # 5. APK ilovani yig'ish (Muvaffaqiyatli yakunlanadi)
     - name: Build Android Secure APK
       run: |
         chmod +x gradlew
@@ -137,3 +137,4 @@ jobs:
         name: Daxilsiz-Suhbat-Secure-App
         path: "app/build/outputs/apk/debug/*.apk"
         if-no-files-found: error
+
