@@ -28,10 +28,10 @@ jobs:
       with:
         gradle-version: '8.0'
 
-    # 4. Android loyiha strukturasini to'liq standartda yaratish
+    # 4. Android loyiha strukturasini yangi qoidalarga moslab yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti va rasmiy manifest sxemasi tiklanmoqda..."
+        echo "Android loyiha muhiti yangi qoidalarga binoan tiklanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
@@ -74,7 +74,7 @@ jobs:
         include ':app'
         EOF
         
-        # app/build.gradle fayli
+        # app/build.gradle fayli (namespace shu yerda sozlangan)
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application' version '8.0.0'
@@ -100,18 +100,17 @@ jobs:
         }
         EOF
 
-        # NIKOHI TO'G'RILANGAN RASMIY AndroidManifest.xml (Xatolikni ildizi bilan yo'q qiladi)
+        # TAVSIYAGA BINOAN 'package' ATRIBUTI OLIB TASHLANGAN AndroidManifest.xml
         mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://android.com"
-            package="com.daxilsiz.suhbat">
+        <manifest xmlns:android="http://android.com">
             <application
                 android:allowBackup="true"
                 android:label="Daxilsiz"
                 android:supportsRtl="true">
                 <activity 
-                    android:name=".ui.SecurityLockActivity" 
+                    android:name="com.daxilsiz.suhbat.ui.SecurityLockActivity" 
                     android:exported="true">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
@@ -137,4 +136,3 @@ jobs:
         name: Daxilsiz-Suhbat-Secure-App
         path: "app/build/outputs/apk/debug/*.apk"
         if-no-files-found: error
-
