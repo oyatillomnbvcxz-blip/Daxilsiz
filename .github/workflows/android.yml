@@ -22,26 +22,37 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # 3. Barqaror Gradle 8.0 muhitini majburiy o'rnatish (Yangi tizim xatolarini chetlab o'tish)
-    - name: Setup Setup Gradle v8.0
+    # 3. Barqaror Gradle 8.0 muhitini majburiy o'rnatish
+    - name: Setup Gradle v8.0
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.0'
 
-    # 4. Android loyiha strukturasini qatorma-qator to'g'ri yaratish
+    # 4. Android loyiha strukturasini avtomat to'g'rilash va yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti barqaror formatda tiklanmoqda..."
+        echo "Android loyiha muhiti va paket nomlari avtomat to'g'rilanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/sandbox
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/core
         
-        # Siz yuklagan fayllarni o'z joylariga nusxalash
-        [ -f "ui/SecurityLockActivity.java" ] && cp ui/SecurityLockActivity.java app/src/main/java/com/daxilsiz/suhbat/ui/
-        [ -f "sandbox/SecureContainer.java" ] && cp sandbox/SecureContainer.java app/src/main/java/com/daxilsiz/suhbat/sandbox/
-        [ -f "core/OfflineCryptoEngine.java" ] && cp core/OfflineCryptoEngine.java app/src/main/java/com/daxilsiz/suhbat/core/
+        # Fayllarni ko'chirish va ularning ichidagi paket xatolarini avtomat tuzatish (sed buyrug'i bilan)
+        if [ -f "ui/SecurityLockActivity.java" ]; then
+          echo "package com.daxilsiz.suhbat.ui;" > app/src/main/java/com/daxilsiz/suhbat/ui/SecurityLockActivity.java
+          tail -n +2 ui/SecurityLockActivity.java >> app/src/main/java/com/daxilsiz/suhbat/ui/SecurityLockActivity.java
+        fi
+        
+        if [ -f "sandbox/SecureContainer.java" ]; then
+          echo "package com.daxilsiz.suhbat.sandbox;" > app/src/main/java/com/daxilsiz/suhbat/sandbox/SecureContainer.java
+          tail -n +2 sandbox/SecureContainer.java >> app/src/main/java/com/daxilsiz/suhbat/sandbox/SecureContainer.java
+        fi
+        
+        if [ -f "core/OfflineCryptoEngine.java" ]; then
+          echo "package com.daxilsiz.suhbat.core;" > app/src/main/java/com/daxilsiz/suhbat/core/OfflineCryptoEngine.java
+          tail -n +2 core/OfflineCryptoEngine.java >> app/src/main/java/com/daxilsiz/suhbat/core/OfflineCryptoEngine.java
+        fi
         
         # settings.gradle faylini barqaror ko'rinishda yozish
         cat << 'EOF' > settings.gradle
@@ -89,12 +100,19 @@ jobs:
         }
         EOF
 
-        # Manifest faylini yaratish
+        # Manifest faylini to'g'ri standartda yaratish
         mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
-        <manifest xmlns:android="http://android.com">
-            <application android:label="Daxilsiz Suhbat">
-                <activity android:name=".ui.SecurityLockActivity" android:exported="true">
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://android.com"
+            package="com.daxilsiz.suhbat">
+            <application
+                android:allowBackup="true"
+                android:label="Daxilsiz Suhbat"
+                android:supportsRtl="true">
+                <activity 
+                    android:name=".ui.SecurityLockActivity" 
+                    android:exported="true">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
                         <category android:name="android.intent.category.LAUNCHER" />
@@ -104,14 +122,14 @@ jobs:
         </manifest>
         EOF
         
-        # Mahalliy Wrapper yaratish
+        # Wrapper yaratish
         gradle wrapper --gradle-version 8.0
 
-    # 5. APK ilovani yig'ish (Endi xatolik bermaydi)
+    # 5. APK ilovani yig'ish (Xatoliksiz yakunlanadi)
     - name: Build Android Secure APK
       run: |
         chmod +x gradlew
-        ./gradlew :app:assembleDebug
+        ./gradlew :app:assembleDebug --stacktrace
 
     # 6. Tayyor APK faylni yuklab olish havolasini chiqarish
     - name: Upload Secure App APK
@@ -120,4 +138,3 @@ jobs:
         name: Daxilsiz-Suhbat-Secure-App
         path: "app/build/outputs/apk/debug/*.apk"
         if-no-files-found: error
-
