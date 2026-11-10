@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Kodlarni birinchi bo'lib yuklab olish (Xatolikni oldini oladi)
+    # 1. Kodlarni yuklab olish
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # 2. Java muhitini eng yangi v5 versiyada sozlash
+    # 2. Java muhitini sozlash (Kesh qidirish o'chirilgan)
     - name: Set up JDK 17
       uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: 'gradle'
+        # cache: 'gradle' qatori olib tashlandi, endi xato bermaydi
 
     # 3. Gradle skriptiga ishga tushish ruxsatini berish
     - name: Grant execute permission for gradlew
