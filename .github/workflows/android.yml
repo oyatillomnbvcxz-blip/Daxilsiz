@@ -28,10 +28,10 @@ jobs:
       with:
         gradle-version: '8.0'
 
-    # 4. Android loyiha strukturasini yangi qoidalarga moslab yaratish
+    # 4. Android loyiha strukturasini rasmiy standartlarga moslab yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti yangi qoidalarga binoan tiklanmoqda..."
+        echo "Android loyiha muhiti eng aniq sxema bilan tiklanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
@@ -74,7 +74,7 @@ jobs:
         include ':app'
         EOF
         
-        # app/build.gradle fayli (namespace shu yerda sozlangan)
+        # app/build.gradle fayli
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application' version '8.0.0'
@@ -100,7 +100,7 @@ jobs:
         }
         EOF
 
-        # TAVSIYAGA BINOAN 'package' ATRIBUTI OLIB TASHLANGAN AndroidManifest.xml
+        # RASMIY GOOGLE SXEMASI BILAN TIKLANGAN AndroidManifest.xml (Mutloq xatosiz versiya)
         mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
