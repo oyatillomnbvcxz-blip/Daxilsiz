@@ -15,30 +15,30 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v5
 
-    # 2. Java 17 muhitini barqaror sozlash
+    # 2. Java 17 muhitini sozlash
     - name: Set up JDK 17
       uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    # 3. Barqaror Gradle 8.0 muhitini majburiy o'rnatish
+    # 3. Barqaror Gradle 8.0 muhitini o'rnatish
     - name: Setup Gradle v8.0
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.0'
 
-    # 4. Android loyiha strukturasini avtomat to'g'rilash va yaratish
+    # 4. Android loyiha strukturasini mukammal standartda yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti va paket nomlari avtomat to'g'rilanmoqda..."
+        echo "Android loyiha muhiti va paket nomlari qayta tiklanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/sandbox
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/core
         
-        # Fayllarni ko'chirish va ularning ichidagi paket xatolarini avtomat tuzatish (sed buyrug'i bilan)
+        # Java fayllarini ko'chirish va paket nomlarini to'g'rilash
         if [ -f "ui/SecurityLockActivity.java" ]; then
           echo "package com.daxilsiz.suhbat.ui;" > app/src/main/java/com/daxilsiz/suhbat/ui/SecurityLockActivity.java
           tail -n +2 ui/SecurityLockActivity.java >> app/src/main/java/com/daxilsiz/suhbat/ui/SecurityLockActivity.java
@@ -54,7 +54,7 @@ jobs:
           tail -n +2 core/OfflineCryptoEngine.java >> app/src/main/java/com/daxilsiz/suhbat/core/OfflineCryptoEngine.java
         fi
         
-        # settings.gradle faylini barqaror ko'rinishda yozish
+        # settings.gradle fayli
         cat << 'EOF' > settings.gradle
         pluginManagement {
             repositories {
@@ -74,7 +74,7 @@ jobs:
         include ':app'
         EOF
         
-        # app/build.gradle faylini barqaror versiyada tuzish
+        # app/build.gradle fayli
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application' version '8.0.0'
@@ -100,7 +100,7 @@ jobs:
         }
         EOF
 
-        # Manifest faylini to'g'ri standartda yaratish
+        # TIZIM MANZILI TO'G'RILANGAN AndroidManifest.xml (Xatolikni yo'qotadi)
         mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
@@ -122,16 +122,15 @@ jobs:
         </manifest>
         EOF
         
-        # Wrapper yaratish
         gradle wrapper --gradle-version 8.0
 
-    # 5. APK ilovani yig'ish (Xatoliksiz yakunlanadi)
+    # 5. APK ilovani yig'ish (Yashil bo'lib yakunlanadi)
     - name: Build Android Secure APK
       run: |
         chmod +x gradlew
-        ./gradlew :app:assembleDebug --stacktrace
+        ./gradlew :app:assembleDebug
 
-    # 6. Tayyor APK faylni yuklab olish havolasini chiqarish
+    # 6. Tayyor APKni yuklab olish uchun chiqarish
     - name: Upload Secure App APK
       uses: actions/upload-artifact@v4
       with:
