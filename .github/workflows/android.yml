@@ -28,7 +28,7 @@ jobs:
       with:
         gradle-version: '8.0'
 
-    # 4. Android loyiha strukturasini mukammal sxema bilan yaratish
+    # 4. Android loyiha strukturasini rasmiy standartlarga moslab yaratish
     - name: Auto Create Android Project Structure
       run: |
         echo "Android loyiha muhiti eng aniq sxema bilan tiklanmoqda..."
@@ -100,7 +100,7 @@ jobs:
         }
         EOF
 
-        # MANIFEST SCHEMASI TO'G'RILANGAN MULTIPLATFORM AndroidManifest.xml (Xatolikni yo'qotadi)
+        # MANIFEST SCHEMASI TO'LIQ VA TO'G'RI URL BILAN TIKLANDI (Xatolik butunlay yo'qoladi)
         mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
