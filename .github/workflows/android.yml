@@ -11,21 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. GitHub repozitoriyangizdagi fayllarni yuklab olish
+    # 1. Repozitoriyani yuklab olish
     - name: Checkout Repository
       uses: actions/checkout@v5
 
-    # 2. Java muhitini sozlash
+    # 2. Java 17 muhitini barqaror sozlash
     - name: Set up JDK 17
       uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    # 3. Android loyiha strukturasini qatorma-qator to'g'ri yaratish
+    # 3. Barqaror Gradle 8.0 muhitini majburiy o'rnatish (Yangi tizim xatolarini chetlab o'tish)
+    - name: Setup Setup Gradle v8.0
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.0'
+
+    # 4. Android loyiha strukturasini qatorma-qator to'g'ri yaratish
     - name: Auto Create Android Project Structure
       run: |
-        echo "Android loyiha muhiti qayta tiklanmoqda..."
+        echo "Android loyiha muhiti barqaror formatda tiklanmoqda..."
         
         # Kerakli papkalarni ochish
         mkdir -p app/src/main/java/com/daxilsiz/suhbat/ui
@@ -37,7 +43,7 @@ jobs:
         [ -f "sandbox/SecureContainer.java" ] && cp sandbox/SecureContainer.java app/src/main/java/com/daxilsiz/suhbat/sandbox/
         [ -f "core/OfflineCryptoEngine.java" ] && cp core/OfflineCryptoEngine.java app/src/main/java/com/daxilsiz/suhbat/core/
         
-        # settings.gradle faylini to'g'ri yozish (app modulini qo'shish)
+        # settings.gradle faylini barqaror ko'rinishda yozish
         cat << 'EOF' > settings.gradle
         pluginManagement {
             repositories {
@@ -57,20 +63,20 @@ jobs:
         include ':app'
         EOF
         
-        # app/build.gradle faylini qatorma-qator tuzish
+        # app/build.gradle faylini barqaror versiyada tuzish
         cat << 'EOF' > app/build.gradle
         plugins {
-            id 'com.android.application' version '8.1.1'
+            id 'com.android.application' version '8.0.0'
         }
         
         android {
             namespace 'com.daxilsiz.suhbat'
-            compileSdk 34
+            compileSdk 33
             
             defaultConfig {
                 applicationId "com.daxilsiz.suhbat"
                 minSdk 24
-                targetSdk 34
+                targetSdk 33
                 versionCode 1
                 versionName "1.0"
             }
@@ -83,7 +89,7 @@ jobs:
         }
         EOF
 
-        # Bo'sh AndroidManifest.xml faylini yaratish (baxshiy xavfsizlik uchun majburiy)
+        # Manifest faylini yaratish
         mkdir -p app/src/main
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <manifest xmlns:android="http://android.com">
@@ -98,16 +104,16 @@ jobs:
         </manifest>
         EOF
         
-        # Gradle dasturini yuklash
+        # Mahalliy Wrapper yaratish
         gradle wrapper --gradle-version 8.0
 
-    # 4. APK ilovani yig'ish (Endi assembleDebug vazifasi ishlaydi)
+    # 5. APK ilovani yig'ish (Endi xatolik bermaydi)
     - name: Build Android Secure APK
       run: |
         chmod +x gradlew
         ./gradlew :app:assembleDebug
 
-    # 5. Tayyor APK faylni yuklab olish uchun chiqarish
+    # 6. Tayyor APK faylni yuklab olish havolasini chiqarish
     - name: Upload Secure App APK
       uses: actions/upload-artifact@v4
       with:
